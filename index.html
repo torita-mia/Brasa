@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Benchmark — Apps de Recetas</title>
+<style>
+  :root {
+    --bg: #0f0f11;
+    --surface: #16161a;
+    --surface2: #1e1e24;
+    --border: #2a2a32;
+    --accent: #e8c547;
+    --accent2: #5b8dee;
+    --text: #e8e8ec;
+    --text-muted: #7a7a8c;
+    --text-dim: #4a4a5a;
+    --green: #4caf87;
+    --red: #e05c5c;
+    --orange: #e07c3a;
+    --tag-bg: #1e1e2c;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    padding: 2rem 1rem;
+  }
+
+  .wrapper {
+    max-width: 1080px;
+    margin: 0 auto;
+  }
+
+  /* HEADER */
+  .header {
+    margin-bottom: 3rem;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 0.5rem;
+  }
+  .header h1 {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+    margin-bottom: 0.75rem;
+  }
+  .header p {
+    color: var(--text-muted);
+    max-width: 560px;
+    font-size: 13.5px;
+  }
+
+  /* SECTION TITLE */
+  .section-label {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    margin-top: 2.5rem;
+  }
+  .section-label span {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* TIPO BADGE */
+  .tipo-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+  }
+  .badge-directo { background: rgba(232,197,71,.12); color: var(--accent); }
+  .badge-indirecto { background: rgba(91,141,238,.12); color: var(--accent2); }
+
+  /* APP CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1.25rem;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: #3a3a48; }
+
+  .card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .card-origin {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .stars {
+    font-size: 12px;
+    color: var(--accent);
+    white-space: nowrap;
+  }
+  .stars span {
+    color: var(--text-muted);
+    font-size: 11px;
+    margin-left: 2px;
+  }
+
+  .card-stat-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .stat-box {
+    flex: 1;
+    background: var(--surface2);
+    border-radius: 6px;
+    padding: 0.5rem 0.6rem;
+  }
+  .stat-box .stat-label {
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat-box .stat-val {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .card-pros-cons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+  }
+  .pros, .cons {
+    border-radius: 6px;
+    padding: 0.5rem 0.65rem;
+    font-size: 12px;
+  }
+  .pros { background: rgba(76,175,135,.08); }
+  .cons { background: rgba(224,92,92,.08); }
+  .pros-title { color: var(--green); font-weight: 700; margin-bottom: 0.3rem; font-size: 10px; text-transform: uppercase; }
+  .cons-title { color: var(--red); font-weight: 700; margin-bottom: 0.3rem; font-size: 10px; text-transform: uppercase; }
+  .pros ul, .cons ul { list-style: none; padding: 0; }
+  .pros li, .cons li { color: var(--text-muted); margin-bottom: 0.2rem; line-height: 1.4; }
+  .pros li::before { content: '+ '; color: var(--green); }
+  .cons li::before { content: '− '; color: var(--red); }
+
+  .card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-top: 0.75rem;
+  }
+  .tag {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  /* HIGHLIGHT CARD (Cookpad) */
+  .card-highlight {
+    border-color: var(--accent);
+    position: relative;
+  }
+  .card-highlight::before {
+    content: 'REFERENCIA';
+    position: absolute;
+    top: -9px;
+    left: 14px;
+    background: var(--accent);
+    color: #000;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    padding: 1px 7px;
+    border-radius: 3px;
+  }
+
+  /* TABLA COMPARATIVA */
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead tr {
+    background: var(--surface2);
+  }
+  th {
+    text-align: left;
+    padding: 0.75rem 1rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface2); }
+
+  .check { color: var(--green); font-size: 13px; }
+  .cross { color: var(--red); font-size: 13px; }
+  .partial { color: var(--orange); font-size: 13px; }
+
+  .app-name-cell {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .app-name-cell .ref-mark {
+    font-size: 9px;
+    color: var(--accent);
+    font-weight: 700;
+    margin-left: 4px;
+  }
+
+  /* INSIGHTS */
+  .insights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+  }
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.1rem;
+  }
+  .insight-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+  }
+  .insight-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 0.4rem;
+  }
+  .insight-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+
+  /* GAP section */
+  .gap-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .gap-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent2);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .gap-item strong { color: var(--text); }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    font-size: 11.5px;
+    color: var(--text-dim);
+  }
+  .footer a { color: var(--text-dim); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-eyebrow">Benchmark competitivo · Junio 2026</div>
+    <h1>Apps de recetas y cocina<br>Directo e indirecto</h1>
+    <p>Análisis comparativo de los principales players del mercado de apps de recetas, con foco en comunidad UGC, funcionalidades, modelo de negocio y posicionamiento. Referencia base: Cookpad.</p>
+  </div>
+
+  <!-- ===================== -->
+  <!-- COMPETIDORES DIRECTOS -->
+  <!-- ===================== -->
+  <div class="section-label"><span><span class="tipo-badge badge-directo">Directo</span> &nbsp; Mismo modelo: comunidad + recetas UGC</span></div>
+
+  <div class="cards-grid">
+
+    <!-- COOKPAD (referencia) -->
+    <div class="card card-highlight">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Cookpad</div>
+          <div class="card-origin">Japón · 1997 · Cotiza en TSE</div>
+        </div>
+        <div class="stars">★★★★☆ <span>4.3</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Usuarios</div><div class="stat-val">+60M</div></div>
+        <div class="stat-box"><div class="stat-label">Revenue</div><div class="stat-val">$35.6M/año</div></div>
+        <div class="stat-box"><div class="stat-label">Países</div><div class="stat-val">70+</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Comunidad masiva UGC</li><li>Muy fuerte en Japón/LATAM</li><li>Importación desde IG/TikTok</li><li>Foto → receta con IA</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>Revenue cayendo (-5% web)</li><li>UI percibida como anticuada</li><li>Market cap muy bajo (~$56M)</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">UGC puro</span><span class="tag">Freemium $2.50/mes</span><span class="tag">IA básica</span><span class="tag">Red social culinaria</span>
+      </div>
+    </div>
+
+    <!-- ALLRECIPES -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Allrecipes</div>
+          <div class="card-origin">EE.UU. · 1997 · Dotdash Meredith</div>
+        </div>
+        <div class="stars">★★★★☆ <span>4.5</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Usuarios</div><div class="stat-val">+40M</div></div>
+        <div class="stat-box"><div class="stat-label">Visitas web</div><div class="stat-val">1.3B/año</div></div>
+        <div class="stat-box"><div class="stat-label">Países</div><div class="stat-val">100+</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Mayor comunidad en EE.UU.</li><li>Meal plan + dietas (sept 2025)</li><li>Reseñas y fotos de usuarios</li><li>Respaldo editorial (Meredith)</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>App Dinner Spinner discontinuada</li><li>UX pesada, muchos ads</li><li>Poca personalización por IA</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">UGC + editorial</span><span class="tag">Freemium</span><span class="tag">Meal planning</span><span class="tag">Grocery sync</span>
+      </div>
+    </div>
+
+    <!-- KITCHEN STORIES -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Kitchen Stories</div>
+          <div class="card-origin">Alemania · 2014 · Kaufland</div>
+        </div>
+        <div class="stars">★★★★★ <span>4.7</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Usuarios</div><div class="stat-val">+12M</div></div>
+        <div class="stat-box"><div class="stat-label">Revenue</div><div class="stat-val">€7.99/mes</div></div>
+        <div class="stat-box"><div class="stat-label">Países</div><div class="stat-val">100+</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Producción visual top (videos HD)</li><li>Cooking Mode paso a paso</li><li>Comunidad activa DE/US/UK</li><li>Sincronización multi-dispositivo</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>Base de usuarios menor</li><li>UGC menos desarrollado</li><li>Premium caro vs competencia</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Editorial + UGC</span><span class="tag">Video HD</span><span class="tag">Cooking Mode</span><span class="tag">Freemium</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ========================= -->
+  <!-- COMPETIDORES INDIRECTOS   -->
+  <!-- ========================= -->
+  <div class="section-label"><span><span class="tipo-badge badge-indirecto">Indirecto</span> &nbsp; Otro modelo, mismo trabajo: encontrar/gestionar recetas</span></div>
+
+  <div class="cards-grid">
+
+    <!-- YUMMLY -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Yummly</div>
+          <div class="card-origin">EE.UU. · 2009 · Whirlpool / KitchenAid</div>
+        </div>
+        <div class="stars">★★★★★ <span>4.8</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Usuarios</div><div class="stat-val">+30M</div></div>
+        <div class="stat-box"><div class="stat-label">Recetas</div><div class="stat-val">+2M</div></div>
+        <div class="stat-box"><div class="stat-label">Países</div><div class="stat-val">150+</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Mayor rating del mercado</li><li>IA de personalización avanzada</li><li>Integración con smart appliances</li><li>Grocery delivery (ago 2025)</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>Sin UGC propio (recetas curadas)</li><li>Enfocado en ecosistema Whirlpool</li><li>Comunidad casi nula</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Personalización IA</span><span class="tag">Smart kitchen</span><span class="tag">Grocery delivery</span><span class="tag">Curado</span>
+      </div>
+    </div>
+
+    <!-- TASTY -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Tasty</div>
+          <div class="card-origin">EE.UU. · 2015 · BuzzFeed</div>
+        </div>
+        <div class="stars">★★★★★ <span>4.7</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Usuarios</div><div class="stat-val">+25M</div></div>
+        <div class="stat-box"><div class="stat-label">Países</div><div class="stat-val">120+</div></div>
+        <div class="stat-box"><div class="stat-label">Origen</div><div class="stat-val">RRSS viral</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Video top-down icónico</li><li>Fuerte en jóvenes (Gen Z/Millennial)</li><li>IA pantry-to-recipe (oct 2025)</li><li>Filtros dieta avanzados</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>Contenido solo editorial, sin UGC</li><li>Poco margen de personalización</li><li>Dependencia de BuzzFeed (volátil)</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Video-first</span><span class="tag">Social media</span><span class="tag">IA pantry</span><span class="tag">Gen Z</span>
+      </div>
+    </div>
+
+    <!-- EKILU / MEALIME -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-name">Ekilu / Mealime</div>
+          <div class="card-origin">España / Canadá · Foco en salud</div>
+        </div>
+        <div class="stars">★★★★☆ <span>4.4</span></div>
+      </div>
+      <div class="card-stat-row">
+        <div class="stat-box"><div class="stat-label">Foco</div><div class="stat-val">Salud</div></div>
+        <div class="stat-box"><div class="stat-label">Integración</div><div class="stat-val">Nutrición</div></div>
+        <div class="stat-box"><div class="stat-label">IA</div><div class="stat-val">Meal plan</div></div>
+      </div>
+      <div class="card-pros-cons">
+        <div class="pros"><div class="pros-title">Fortalezas</div><ul><li>Meal planning con IA</li><li>Seguimiento nutricional</li><li>Filtros < 20 min / < 5 ingredientes</li><li>Integración objetivos de salud</li></ul></div>
+        <div class="cons"><div class="cons-title">Debilidades</div><ul><li>Sin comunidad ni UGC</li><li>Nicho muy específico</li><li>Menor base de usuarios</li></ul></div>
+      </div>
+      <div class="card-tags">
+        <span class="tag">Health-first</span><span class="tag">Meal plan IA</span><span class="tag">Tracking nutricional</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =================== -->
+  <!-- TABLA COMPARATIVA   -->
+  <!-- =================== -->
+  <div class="section-label"><span>Tabla comparativa de funcionalidades</span></div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>App</th>
+          <th>Tipo</th>
+          <th>Comunidad UGC</th>
+          <th>Subir recetas</th>
+          <th>Video nativo</th>
+          <th>IA / Smart</th>
+          <th>Meal planning</th>
+          <th>Grocery list</th>
+          <th>Filtros dieta</th>
+          <th>Offline</th>
+          <th>Monetización</th>
+          <th>Rating</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="app-name-cell">Cookpad <span class="ref-mark">REF</span></td>
+          <td><span class="tipo-badge badge-directo">Directo</span></td>
+          <td><span class="check">✓ fuerte</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="partial">◐ básico</span></td>
+          <td><span class="partial">◐ premium</span></td>
+          <td><span class="partial">◐ premium</span></td>
+          <td><span class="partial">◐ premium</span></td>
+          <td><span class="cross">✗</span></td>
+          <td>Freemium $2.50/mes</td>
+          <td>4.3 ★</td>
+        </tr>
+        <tr>
+          <td class="app-name-cell">Allrecipes</td>
+          <td><span class="tipo-badge badge-directo">Directo</span></td>
+          <td><span class="check">✓ fuerte</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="partial">◐ limitado</span></td>
+          <td><span class="partial">◐ básico</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓ grocery sync</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td>Ads + freemium</td>
+          <td>4.5 ★</td>
+        </tr>
+        <tr>
+          <td class="app-name-cell">Kitchen Stories</td>
+          <td><span class="tipo-badge badge-directo">Directo</span></td>
+          <td><span class="partial">◐ media</span></td>
+          <td><span class="partial">◐ limitado</span></td>
+          <td><span class="check">✓ HD</span></td>
+          <td><span class="partial">◐ básico</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td>Freemium €7.99/mes</td>
+          <td>4.7 ★</td>
+        </tr>
+        <tr>
+          <td class="app-name-cell">Yummly</td>
+          <td><span class="tipo-badge badge-indirecto">Indirecto</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓ avanzado</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓ + delivery</span></td>
+          <td><span class="check">✓ alergias</span></td>
+          <td><span class="partial">◐ premium</span></td>
+          <td>Freemium + ecosistema Whirlpool</td>
+          <td>4.8 ★</td>
+        </tr>
+        <tr>
+          <td class="app-name-cell">Tasty</td>
+          <td><span class="tipo-badge badge-indirecto">Indirecto</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="check">✓ top-down</span></td>
+          <td><span class="check">✓ pantry IA</span></td>
+          <td><span class="partial">◐</span></td>
+          <td><span class="partial">◐</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+          <td>Freemium + ads</td>
+          <td>4.7 ★</td>
+        </tr>
+        <tr>
+          <td class="app-name-cell">Ekilu / Mealime</td>
+          <td><span class="tipo-badge badge-indirecto">Indirecto</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="cross">✗</span></td>
+          <td><span class="partial">◐</span></td>
+          <td><span class="check">✓ meal plan</span></td>
+          <td><span class="check">✓ fuerte</span></td>
+          <td><span class="check">✓</span></td>
+          <td><span class="check">✓ salud</span></td>
+          <td><span class="cross">✗</span></td>
+          <td>Freemium + suscripción</td>
+          <td>4.4 ★</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ==================== -->
+  <!-- INSIGHTS / PATRONES  -->
+  <!-- ==================== -->
+  <div class="section-label"><span>Insights y patrones del mercado</span></div>
+
+  <div class="insights-grid">
+    <div class="insight-card">
+      <div class="insight-icon">📱</div>
+      <div class="insight-title">UGC vs. Curado: la gran división</div>
+      <div class="insight-text">Los competidores directos apuestan por comunidad (Cookpad, Allrecipes). Los indirectos confían en contenido editorial o curado con IA. Las apps que intentan mezclar ambos (Kitchen Stories) logran los ratings más altos, pero tienen menor base de usuarios.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🤖</div>
+      <div class="insight-title">IA como diferencial en 2025</div>
+      <div class="insight-text">El mercado se está moviendo hacia IA: Tasty lanzó pantry-to-recipe (oct 2025), Allrecipes sumó meal plans personalizados (sept 2025), Yummly integró grocery delivery (ago 2025). Cookpad tiene IA de foto-a-receta pero va rezagado en personalización.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">💰</div>
+      <div class="insight-title">Freemium sigue siendo el modelo dominante</div>
+      <div class="insight-text">Todas las apps usan freemium. El precio estándar ronda los $2.50–$4.99/mes. Cookpad cobra el mínimo del mercado ($2.50/mes). El segmento de in-app purchases es el de crecimiento más rápido según análisis de mercado 2025.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🎯</div>
+      <div class="insight-title">El video es base mínima esperada</div>
+      <div class="insight-text">Kitchen Stories y Tasty establecieron el video HD como estándar. Cookpad y Allrecipes, que vienen del texto/foto, lo tienen de forma parcial o débil. Los nuevos entrantes que no tienen video nativo son penalizados en ratings.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">🌎</div>
+      <div class="insight-title">Cookpad es líder en LATAM e Indonesia</div>
+      <div class="insight-text">Mientras las apps americanas dominan EE.UU./Europa, Cookpad tiene posición única en Argentina, Chile, México, Indonesia y Japón. La localización de contenido (recetas locales UGC) es su ventaja defensiva más clara.</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-icon">📉</div>
+      <div class="insight-title">Cookpad en declive financiero</div>
+      <div class="insight-text">Revenue cayó de ~$43M (jun 2024) a $35.6M (dic 2025). El tráfico web bajó 5.4% en el último mes. Market cap de $56M es muy bajo para 60M de usuarios, señalando problemas de monetización y competencia de TikTok/YouTube como sustitutos.</div>
+    </div>
+  </div>
+
+  <!-- ==================== -->
+  <!-- GAPS / OPORTUNIDADES -->
+  <!-- ==================== -->
+  <div class="section-label"><span>Gaps detectados del benchmark</span></div>
+
+  <div class="gap-list">
+    <div class="gap-item"><strong>Sin app con UGC fuerte + IA avanzada a la vez.</strong> Cookpad tiene comunidad pero IA débil. Yummly tiene IA pero sin comunidad. Ese cruce es el hueco del mercado.</div>
+    <div class="gap-item"><strong>Ninguna app resuelve bien la experiencia offline.</strong> Solo Paprika (pago único) la ofrece bien. En LATAM con conectividad inestable, esto es una fricción real ignorada.</div>
+    <div class="gap-item"><strong>Poco contenido en español de calidad + video.</strong> Las apps de video (Tasty, Kitchen Stories) son mayormente en inglés. Cookpad tiene comunidad hispana pero sin video. Brecha sin resolver.</div>
+    <div class="gap-item"><strong>La gamificación está subexplotada.</strong> Ningún player tiene un sistema de logros, retos o progresión del cocinero consolidado. Cookpad tiene los "cooksnaps" pero no van más allá.</div>
+    <div class="gap-item"><strong>El negocio B2B está emergiendo.</strong> Yummly con Whirlpool, Kitchen Stories con Kaufland. Las apps con respaldo de cadenas retail o fabricantes de electrodomésticos tienen ventaja competitiva que las puras play no pueden igualar.</div>
+  </div>
+
+  <div class="footer">
+    Datos: Electroiq, PitchBook, SimilarWeb, MarketResearchFuture, BestApp.com · Junio 2026 · Benchmark elaborado con datos públicos disponibles.
+  </div>
+
+</div>
+</body>
+</html>
